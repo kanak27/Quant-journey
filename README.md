@@ -4,6 +4,26 @@ A personal learning repository documenting my path into quantitative finance. Ea
 
 ---
 
+## Repository Structure
+
+```
+Quant Journey/
+├── Nifty50 Quant prep.ipynb          # Return distributions & descriptive stats
+├── Covariance and Correlation.ipynb  # Portfolio diversification analysis
+├── OLS.ipynb                         # OLS regression & hypothesis testing
+├── PCA.ipynb                         # Principal component analysis
+└── Options/
+    ├── Options basic payoffs.ipynb   # Long/Short Call & Put, Covered Call
+    ├── Geometric Brownian Motion.ipynb  # Monte Carlo stock price simulation
+    ├── Black Scholes.ipynb           # BS pricing, Put-Call Parity, sensitivity
+    ├── Greeks.ipynb                  # Delta, Gamma, Vega, Theta
+    ├── Options_basic_payoffs.py      # Reusable module
+    ├── Geometric_Brownian_Motion.py  # Reusable module
+    └── Black_Scholes.py              # Reusable module (imported by Greeks.ipynb)
+```
+
+---
+
 ## Notebooks
 
 ### 1. `Nifty50 Quant prep.ipynb` — Return Distributions & Descriptive Statistics
@@ -20,7 +40,7 @@ The starting point. Downloads one year of Nifty 50 (^NSEI) index data and builds
 
 ---
 
-### 2. `Covariance and Corelation.ipynb` — Portfolio Diversification Analysis
+### 2. `Covariance and Correlation.ipynb` — Portfolio Diversification Analysis
 Extends the single-index analysis to a 5-stock Nifty portfolio to understand co-movement between large-cap Indian equities.
 
 **Stocks:** RELIANCE · HDFCBANK · TCS · INFY · ITC
@@ -66,7 +86,22 @@ Applies dimensionality reduction to a 10-stock Nifty basket to uncover the laten
 - PC2 (~15.3%) captures a growth vs. defensive split, contrasting IT stocks (INFY, TCS) against industrials
 - ~5 components are sufficient to explain ~80% of total variance in the basket
 
-### 5. `Geometric Brownian Motion.ipynb` — Monte Carlo Stock Price Simulation
+---
+
+### 5. `Options/Options basic payoffs.ipynb` — Options Payoff Diagrams & Covered Call
+Builds intuition for vanilla options by computing and plotting payoff profiles for all four basic positions, then constructs a Covered Call strategy.
+
+**What's covered:**
+- Implementing payoff functions for **Long Call**, **Long Put**, **Short Call**, and **Short Put** (profit = payoff − premium)
+- Generating a payoff table across stock prices 1–100 (K = 50, premium = 10)
+- Plotting all four payoffs as a 2×2 subplot grid
+- Combining a **long stock position** with a **short call** to produce a **Covered Call** payoff
+
+**Key insight:** The Covered Call caps profit at `premium + (K − cost_of_stock)` = 20, while retaining full downside exposure — illustrating the classic income-vs-protection trade-off.
+
+---
+
+### 6. `Options/Geometric Brownian Motion.ipynb` — Monte Carlo Stock Price Simulation
 Implements the GBM stochastic process from scratch to simulate realistic stock price paths, forming the backbone of options pricing models.
 
 **The model:** `S(t) = S₀ · exp((μ − 0.5σ²)t + σW(t))`
@@ -75,24 +110,46 @@ Implements the GBM stochastic process from scratch to simulate realistic stock p
 - Deriving the discrete GBM formula and implementing `simulate_gbm()` using cumulative Brownian increments
 - Building a **simulation engine** that runs an arbitrary number of independent paths (100 / 1 000 / 10 000 runs)
 - Plotting all simulated price paths and the resulting **terminal price histogram**
-- Observing convergence: as simulation runs increase the terminal price distribution converges toward a log-normal
+- Observing convergence toward a log-normal as simulation runs increase
 
-**Parameters used:** S₀ = 100, μ = 5%, σ = 20%, T = 1 year, N = 252 trading days
+**Parameters:** S₀ = 100, μ = 5%, σ = 20%, T = 1 year, N = 252 trading days
 
 **Key insight:** The right-skewed terminal price distribution reflects the log-normal assumption embedded in GBM — the same assumption underpinning Black–Scholes.
 
 ---
 
-### 6. `Options basic payoffs.ipynb` — Options Payoff Diagrams & Covered Call
-Builds intuition for vanilla options by computing and plotting payoff profiles for all four basic positions, then constructs a Covered Call strategy.
+### 7. `Options/Black Scholes.ipynb` — Black-Scholes Pricing from Scratch
+Derives and implements the Black-Scholes formula for European call and put options, verifies Put-Call Parity, and analyses how each input parameter drives option price.
+
+**The formula:** `C = S·N(d₁) − K·e^(−rT)·N(d₂)`
 
 **What's covered:**
-- Implementing payoff functions for **Long Call**, **Long Put**, **Short Call**, and **Short Put** (profit = payoff − premium)
-- Generating a payoff table across stock prices 1–100 (K = 50, premium = 10)
-- Plotting all four payoffs as a 2×2 subplot grid
-- Combining a **long stock position** with a **short call** to produce a **Covered Call** payoff and plotting the capped-upside profile
+- Implementing `calculateD1`, `calculateD2`, `calculateCallOptionPrice`, and `calculatePutOptionPrice` from the raw BS formula
+- Pricing ATM options: C ≈ 10.45, P ≈ 5.57 (S=K=100, σ=20%, r=5%, T=1yr)
+- **Put-Call Parity** verification: `C − P = S − K·e^(−rT)` confirmed to machine precision
+- **4-panel sensitivity analysis** — call price vs σ, T, S, and r (others held fixed)
 
-**Key insight:** The Covered Call caps profit at `premium + (K − cost_of_stock)` = 20, while retaining full downside exposure — illustrating the classic income-vs-protection trade-off.
+**Key findings:**
+- Call price increases monotonically with σ, T (when S > K), and r
+- Call price is most sensitive to underlying price when near the strike — this is where Delta is highest
+- The `.py` module (`Black_Scholes.py`) is imported by `Greeks.ipynb` for reuse
+
+---
+
+### 8. `Options/Greeks.ipynb` — Delta, Gamma, Vega, Theta
+Implements all four first-order Greeks analytically using the Black-Scholes framework and visualises their behaviour across a range of stock prices.
+
+**What's covered:**
+- **Delta** `N(d₁)` — sensitivity of option price to underlying price; S-curve from 0 (deep OTM) to 1 (deep ITM)
+- **Gamma** `N'(d₁) / (S·σ·√T)` — rate of change of Delta; peaks sharply at-the-money
+- **Vega** `S·N'(d₁)·√T` — sensitivity to volatility; also peaks ATM
+- **Theta** — time decay for call and put; separate plot showing **theta acceleration** as expiry approaches (3-month and 1-month markers)
+- All four Greeks plotted in a **2×2 grid** across stock prices 1–200 (K = 100)
+
+**Key insights:**
+- Delta ≈ 0.637 for ATM call (S=K=100), confirming ≈50% ITM probability adjusted for drift
+- Gamma and Vega are highest ATM — this is where the option is most sensitive to small moves and vol changes
+- Theta decay is non-linear and accelerates sharply inside the final month — critical for short-options strategies
 
 ---
 
@@ -102,11 +159,12 @@ Builds intuition for vanilla options by computing and plotting payoff profiles f
 |---|---|
 | `yfinance` | Live market data download |
 | `pandas` | Data wrangling and return calculations |
-| `numpy` | Matrix operations (OLS normal equations) |
-| `scipy.stats` | Descriptive stats, distribution fitting, t-tests, linregress |
-| `matplotlib` | Histograms, CDF plots, scree plots, biplots |
+| `numpy` | Matrix operations, Brownian motion simulation |
+| `scipy.stats` | Descriptive stats, distribution fitting, t-tests, norm CDF/PDF |
+| `matplotlib` | All plots — histograms, sensitivity charts, Greek curves |
 | `seaborn` | Correlation / covariance heatmaps, loadings heatmap |
 | `sklearn` | StandardScaler, PCA |
+| `math` | Scalar BS calculations (log, exp, sqrt) |
 
 ---
 
@@ -119,16 +177,56 @@ pip install pandas yfinance matplotlib seaborn scipy scikit-learn jupyter
 jupyter notebook
 ```
 
-All notebooks fetch live data on execution, so results will update automatically with the latest market prices.
+Notebooks in `Options/` that import `.py` modules (e.g. `Greeks.ipynb` imports `Black_Scholes.py`) must be run from within the `Options/` directory, or the kernel's working directory set to `Options/`.
+
+All market data notebooks fetch live data on execution, so results update automatically with the latest prices.
 
 ---
 
 ## Roadmap
 
-- [ ] Value at Risk (VaR) and Expected Shortfall
-- [ ] Markowitz mean-variance portfolio optimisation
-- [ ] Factor models (Fama–French)
-- [ ] Time series — ARIMA / GARCH on index returns
-- [x] GBM simulation (Monte Carlo paths)
-- [x] Options basic payoffs & Covered Call
-- [ ] Options pricing (Black–Scholes)
+This repo tracks a structured 7-month plan (April → November 2026) toward quant finance roles at firms like WorldQuant, Tower Research, iRage, and Citadel.
+
+### ✅ Phase 1 — Mathematical & Programming Foundation *(May 2026 — complete)*
+
+- [x] Python finance stack: NumPy, Pandas, Matplotlib, Seaborn, SciPy, yfinance
+- [x] Return distributions — daily % returns, log returns, CDFs, normal fitting
+- [x] Descriptive statistics — mean, variance, skewness, kurtosis
+- [x] Covariance & correlation matrices on a 5-stock Nifty basket
+- [x] OLS regression from scratch + hypothesis testing (t-test, p-values)
+- [x] PCA for dimensionality reduction and latent factor discovery
+
+### 🔄 Phase 2 — Quantitative Finance Core *(May 26 – July 6, 2026 — in progress)*
+
+- [x] Geometric Brownian Motion — simulation engine (100 / 1K / 10K paths)
+- [x] Options basic payoffs — Long/Short Call & Put, Covered Call
+- [x] Black-Scholes from scratch — call & put pricing, Put-Call Parity verified
+- [x] Greeks — Delta, Gamma, Vega, Theta (analytical + 2×2 visualisation, theta decay curve)
+- [ ] Monte Carlo options pricing (connect GBM paths to BS pricing)
+- [ ] GARCH(1,1) — fit to Nifty 50 volatility
+- [ ] Time series — autocorrelation, stationarity (ADF test), ARIMA
+- [ ] C++ — Black-Scholes pricer (first C++ finance implementation)
+
+### ⬜ Phase 3 — Machine Learning for Finance *(July 7 – August 16, 2026)*
+
+- [ ] CAPM — alpha, beta, systematic vs idiosyncratic risk
+- [ ] Fama-French 3-Factor Model on NSE data
+- [ ] Momentum factor (Jegadeesh-Titman)
+- [ ] ML for return prediction — Random Forest, XGBoost
+- [ ] Walk-forward cross-validation (avoid look-ahead bias)
+- [ ] Backtesting a momentum strategy on QuantConnect
+
+### ⬜ Phase 4 — Portfolio Projects *(August 17 – September 27, 2026)*
+
+- [ ] **Portfolio Manager** — Markowitz optimisation, efficient frontier, VaR/CVaR, live Zerodha data, Streamlit dashboard
+- [ ] **Pairs Trading** — cointegration (Engle-Granger), Kalman filter hedge ratio, QuantConnect backtest
+- [ ] **Options Analytics Dashboard** — BS + Binomial pricing, Greeks surface plots, volatility smile
+- [ ] **Market Regime Detection** — Hidden Markov Model on Nifty 50, regime-conditioned strategy switching
+
+### ⬜ Phase 5 — Interview Preparation *(September 28 – November 15, 2026)*
+
+- [ ] Probability & brain teasers — 2 problems/day (Mosteller, Green Book)
+- [ ] LeetCode — 3 medium + 1 hard per day in Python & C++
+- [ ] Derive Black-Scholes on a whiteboard from memory
+- [ ] Mock interviews (Pramp, Interviewing.io)
+- [ ] 20+ applications — WorldQuant, Tower, iRage, AlphaGrep, Graviton, Quadeye
