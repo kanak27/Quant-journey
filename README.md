@@ -12,14 +12,15 @@ Quant Journey/
 ├── Covariance and Correlation.ipynb  # Portfolio diversification analysis
 ├── OLS.ipynb                         # OLS regression & hypothesis testing
 ├── PCA.ipynb                         # Principal component analysis
-└── Options/
-    ├── Options basic payoffs.ipynb   # Long/Short Call & Put, Covered Call
-    ├── Geometric Brownian Motion.ipynb  # Monte Carlo stock price simulation
-    ├── Black Scholes.ipynb           # BS pricing, Put-Call Parity, sensitivity
-    ├── Greeks.ipynb                  # Delta, Gamma, Vega, Theta
-    ├── Options_basic_payoffs.py      # Reusable module
-    ├── Geometric_Brownian_Motion.py  # Reusable module
-    └── Black_Scholes.py              # Reusable module (imported by Greeks.ipynb)
+└── Options/                          # Options theory — see Options/README.md
+    ├── Options basic payoffs.ipynb
+    ├── Geometric Brownian Motion.ipynb
+    ├── Black Scholes.ipynb
+    ├── Greeks.ipynb
+    ├── Monte Carlo Options Pricing.ipynb
+    ├── Black_Scholes.py
+    ├── Geometric_Brownian_Motion.py
+    └── Options_basic_payoffs.py
 ```
 
 ---
@@ -88,68 +89,18 @@ Applies dimensionality reduction to a 10-stock Nifty basket to uncover the laten
 
 ---
 
-### 5. `Options/Options basic payoffs.ipynb` — Options Payoff Diagrams & Covered Call
-Builds intuition for vanilla options by computing and plotting payoff profiles for all four basic positions, then constructs a Covered Call strategy.
+### 5. `Options/` — Options Theory & Pricing
+Five notebooks covering options from first principles through to exotic contract pricing. Each notebook builds on the last and shares reusable `.py` modules.
 
-**What's covered:**
-- Implementing payoff functions for **Long Call**, **Long Put**, **Short Call**, and **Short Put** (profit = payoff − premium)
-- Generating a payoff table across stock prices 1–100 (K = 50, premium = 10)
-- Plotting all four payoffs as a 2×2 subplot grid
-- Combining a **long stock position** with a **short call** to produce a **Covered Call** payoff
+| Notebook | Topic |
+|---|---|
+| `Options basic payoffs.ipynb` | Long/Short Call & Put, Covered Call |
+| `Geometric Brownian Motion.ipynb` | Monte Carlo stock price simulation |
+| `Black Scholes.ipynb` | BS pricing, Put-Call Parity, sensitivity analysis |
+| `Greeks.ipynb` | Delta, Gamma, Vega, Theta — analytical + visualised |
+| `Monte Carlo Options Pricing.ipynb` | MC pricing of European & Asian options, convergence to BS |
 
-**Key insight:** The Covered Call caps profit at `premium + (K − cost_of_stock)` = 20, while retaining full downside exposure — illustrating the classic income-vs-protection trade-off.
-
----
-
-### 6. `Options/Geometric Brownian Motion.ipynb` — Monte Carlo Stock Price Simulation
-Implements the GBM stochastic process from scratch to simulate realistic stock price paths, forming the backbone of options pricing models.
-
-**The model:** `S(t) = S₀ · exp((μ − 0.5σ²)t + σW(t))`
-
-**What's covered:**
-- Deriving the discrete GBM formula and implementing `simulate_gbm()` using cumulative Brownian increments
-- Building a **simulation engine** that runs an arbitrary number of independent paths (100 / 1 000 / 10 000 runs)
-- Plotting all simulated price paths and the resulting **terminal price histogram**
-- Observing convergence toward a log-normal as simulation runs increase
-
-**Parameters:** S₀ = 100, μ = 5%, σ = 20%, T = 1 year, N = 252 trading days
-
-**Key insight:** The right-skewed terminal price distribution reflects the log-normal assumption embedded in GBM — the same assumption underpinning Black–Scholes.
-
----
-
-### 7. `Options/Black Scholes.ipynb` — Black-Scholes Pricing from Scratch
-Derives and implements the Black-Scholes formula for European call and put options, verifies Put-Call Parity, and analyses how each input parameter drives option price.
-
-**The formula:** `C = S·N(d₁) − K·e^(−rT)·N(d₂)`
-
-**What's covered:**
-- Implementing `calculateD1`, `calculateD2`, `calculateCallOptionPrice`, and `calculatePutOptionPrice` from the raw BS formula
-- Pricing ATM options: C ≈ 10.45, P ≈ 5.57 (S=K=100, σ=20%, r=5%, T=1yr)
-- **Put-Call Parity** verification: `C − P = S − K·e^(−rT)` confirmed to machine precision
-- **4-panel sensitivity analysis** — call price vs σ, T, S, and r (others held fixed)
-
-**Key findings:**
-- Call price increases monotonically with σ, T (when S > K), and r
-- Call price is most sensitive to underlying price when near the strike — this is where Delta is highest
-- The `.py` module (`Black_Scholes.py`) is imported by `Greeks.ipynb` for reuse
-
----
-
-### 8. `Options/Greeks.ipynb` — Delta, Gamma, Vega, Theta
-Implements all four first-order Greeks analytically using the Black-Scholes framework and visualises their behaviour across a range of stock prices.
-
-**What's covered:**
-- **Delta** `N(d₁)` — sensitivity of option price to underlying price; S-curve from 0 (deep OTM) to 1 (deep ITM)
-- **Gamma** `N'(d₁) / (S·σ·√T)` — rate of change of Delta; peaks sharply at-the-money
-- **Vega** `S·N'(d₁)·√T` — sensitivity to volatility; also peaks ATM
-- **Theta** — time decay for call and put; separate plot showing **theta acceleration** as expiry approaches (3-month and 1-month markers)
-- All four Greeks plotted in a **2×2 grid** across stock prices 1–200 (K = 100)
-
-**Key insights:**
-- Delta ≈ 0.637 for ATM call (S=K=100), confirming ≈50% ITM probability adjusted for drift
-- Gamma and Vega are highest ATM — this is where the option is most sensitive to small moves and vol changes
-- Theta decay is non-linear and accelerates sharply inside the final month — critical for short-options strategies
+→ Full details in [Options/README.md](Options/README.md)
 
 ---
 
@@ -177,9 +128,7 @@ pip install pandas yfinance matplotlib seaborn scipy scikit-learn jupyter
 jupyter notebook
 ```
 
-Notebooks in `Options/` that import `.py` modules (e.g. `Greeks.ipynb` imports `Black_Scholes.py`) must be run from within the `Options/` directory, or the kernel's working directory set to `Options/`.
-
-All market data notebooks fetch live data on execution, so results update automatically with the latest prices.
+Notebooks inside `Options/` import local `.py` modules — run Jupyter from within the `Options/` directory, or set the kernel working directory to `Options/` before executing.
 
 ---
 
@@ -201,8 +150,8 @@ This repo tracks a structured 7-month plan (April → November 2026) toward quan
 - [x] Geometric Brownian Motion — simulation engine (100 / 1K / 10K paths)
 - [x] Options basic payoffs — Long/Short Call & Put, Covered Call
 - [x] Black-Scholes from scratch — call & put pricing, Put-Call Parity verified
-- [x] Greeks — Delta, Gamma, Vega, Theta (analytical + 2×2 visualisation, theta decay curve)
-- [ ] Monte Carlo options pricing (connect GBM paths to BS pricing)
+- [x] Greeks — Delta, Gamma, Vega, Theta (analytical + visualised, theta decay curve)
+- [x] Monte Carlo options pricing — European & Asian options, convergence to BS
 - [ ] GARCH(1,1) — fit to Nifty 50 volatility
 - [ ] Time series — autocorrelation, stationarity (ADF test), ARIMA
 - [ ] C++ — Black-Scholes pricer (first C++ finance implementation)
