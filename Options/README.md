@@ -10,15 +10,18 @@ This folder covers the mathematical machinery of options — from basic payoffs 
 Options/
 ├── Options basic payoffs.ipynb       # Payoff intuition — the starting point
 ├── Geometric Brownian Motion.ipynb   # Stock price simulation
-├── Black Scholes.ipynb               # Analytical pricing from scratch
+├── Black Scholes.ipynb               # Analytical pricing from scratch (Python)
 ├── Greeks.ipynb                      # Delta, Gamma, Vega, Theta
 ├── Monte Carlo Options Pricing.ipynb # MC pricing + Asian options
+├── Black_Scholes.cpp                 # Black-Scholes pricer in C++ (OOP)
 ├── Options_basic_payoffs.py          # Reusable payoff functions
 ├── Geometric_Brownian_Motion.py      # Reusable GBM simulation engine
 └── Black_Scholes.py                  # Reusable BS pricer (imported by Greeks & MC)
 ```
 
-> **Run order:** Notebooks import from `.py` modules in the same folder. Run Jupyter from within the `Options/` directory, or set the kernel working directory to `Options/`.
+> **Python notebooks:** Import from `.py` modules in the same folder. Run Jupyter from within the `Options/` directory, or set the kernel working directory to `Options/`.
+
+> **C++ file:** Compile with `g++ -std=c++17 -o option-cpp Black_Scholes.cpp` and run `./option-cpp`.
 
 ---
 
@@ -111,6 +114,39 @@ Connects the GBM simulation engine to the Black-Scholes framework to price optio
 | 1 000 000 | ≈ 10.45 ✓ |
 
 **Key insight:** MC converges to the BS price (~10.45) at ~100K paths. Asian options price lower than vanilla because averaging dampens the terminal payoff — useful when hedging average-price exposures.
+
+---
+
+### 6. `Black_Scholes.cpp` — C++ Implementation (OOP)
+A from-scratch C++ re-implementation of the Black-Scholes pricer using object-oriented design. Produces identical results to the Python version, serving as the first step toward low-latency pricing code required at HFT firms.
+
+**Design:**
+- Free functions `Cdf(x)` (via `erfc`) and `Pdf(x)` for the standard normal CDF and PDF
+- `Option` class with `const` member variables (strike, expiry, spot, vol, rate) — immutable after construction
+- Private `CalculateD1()` — encapsulates the shared d₁ computation used by all methods
+- Public pricing and Greeks methods
+
+**Methods on `Option`:**
+
+| Method | Formula | Output (S=K=100, σ=20%, r=5%, T=1yr) |
+|---|---|---|
+| `price()` | `S·N(d₁) − K·e^(−rT)·N(d₂)` | 10.4505836 |
+| `putPrice()` | `price() − S + K·e^(−rT)` | 5.5735260 |
+| `delta()` | `N(d₁)` | 0.6368307 |
+| `gamma()` | `N'(d₁) / (S·σ·√T)` | 0.0187296 |
+| `vega()` | `S·N'(d₁)·√T` | 37.4591246 |
+
+**Key design choices:**
+- `erfc`-based normal CDF avoids depending on `<boost>` or external libraries — compiles with standard `g++`
+- All members are `const` — the object represents a fixed contract, not a mutable state
+- Results match the Python implementation to 7 decimal places, cross-validating both
+
+**Compile & run:**
+```bash
+cd Options
+g++ -std=c++17 -o option-cpp Black_Scholes.cpp
+./option-cpp
+```
 
 ---
 

@@ -18,6 +18,7 @@ Quant Journey/
     ├── Black Scholes.ipynb
     ├── Greeks.ipynb
     ├── Monte Carlo Options Pricing.ipynb
+    ├── Black_Scholes.cpp             # C++ OOP implementation
     ├── Black_Scholes.py
     ├── Geometric_Brownian_Motion.py
     └── Options_basic_payoffs.py
@@ -92,13 +93,14 @@ Applies dimensionality reduction to a 10-stock Nifty basket to uncover the laten
 ### 5. `Options/` — Options Theory & Pricing
 Five notebooks covering options from first principles through to exotic contract pricing. Each notebook builds on the last and shares reusable `.py` modules.
 
-| Notebook | Topic |
+| File | Topic |
 |---|---|
 | `Options basic payoffs.ipynb` | Long/Short Call & Put, Covered Call |
 | `Geometric Brownian Motion.ipynb` | Monte Carlo stock price simulation |
 | `Black Scholes.ipynb` | BS pricing, Put-Call Parity, sensitivity analysis |
 | `Greeks.ipynb` | Delta, Gamma, Vega, Theta — analytical + visualised |
 | `Monte Carlo Options Pricing.ipynb` | MC pricing of European & Asian options, convergence to BS |
+| `Black_Scholes.cpp` | C++ OOP pricer — `Option` class with price, Greeks |
 
 → Full details in [Options/README.md](Options/README.md)
 
@@ -116,6 +118,7 @@ Five notebooks covering options from first principles through to exotic contract
 | `seaborn` | Correlation / covariance heatmaps, loadings heatmap |
 | `sklearn` | StandardScaler, PCA |
 | `math` | Scalar BS calculations (log, exp, sqrt) |
+| C++ (`<cmath>`, `<iostream>`) | Low-latency BS pricer — `Option` OOP class |
 
 ---
 
@@ -154,7 +157,7 @@ This repo tracks a structured 7-month plan (April → November 2026) toward quan
 - [x] Monte Carlo options pricing — European & Asian options, convergence to BS
 - [ ] GARCH(1,1) — fit to Nifty 50 volatility
 - [ ] Time series — autocorrelation, stationarity (ADF test), ARIMA
-- [ ] C++ — Black-Scholes pricer (first C++ finance implementation)
+- [x] C++ — Black-Scholes pricer — `Option` class with `price()`, `putPrice()`, `delta()`, `gamma()`, `vega()`
 
 ### ⬜ Phase 3 — Machine Learning for Finance *(July 7 – August 16, 2026)*
 

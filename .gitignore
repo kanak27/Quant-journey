@@ -4,3 +4,17 @@
 # Python cache
 __pycache__/
 *.pyc
+
+# C++ build artifacts
+build/
+*.exe
+*.o
+*.out
+
+# VS Code
+.vscode/
+
+# executables
+*.exe
+*.out
+*.o
