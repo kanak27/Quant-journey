@@ -12,6 +12,7 @@ Quant Journey/
 ├── Covariance and Correlation.ipynb  # Portfolio diversification analysis
 ├── OLS.ipynb                         # OLS regression & hypothesis testing
 ├── PCA.ipynb                         # Principal component analysis
+├── ADF.ipynb                         # Stationarity testing — ADF test
 └── Options/                          # Options theory — see Options/README.md
     ├── Options basic payoffs.ipynb
     ├── Geometric Brownian Motion.ipynb
@@ -90,7 +91,23 @@ Applies dimensionality reduction to a 10-stock Nifty basket to uncover the laten
 
 ---
 
-### 5. `Options/` — Options Theory & Pricing
+### 5. `ADF.ipynb` — Stationarity Testing (Augmented Dickey-Fuller)
+Tests whether the Nifty 50 price series and its return series are stationary — a prerequisite for time series modelling (ARIMA, GARCH).
+
+**What's covered:**
+- Downloading one year of Nifty 50 closing prices
+- Running `statsmodels.tsa.stattools.adfuller` on both the **raw price series** and **daily return series**
+- Comparing ADF statistic against 1%, 5%, and 10% critical values
+- Interpreting p-values to accept or reject the unit root null hypothesis
+
+**Key findings:**
+- Closing prices: ADF = −1.53, p = 0.52 → **non-stationary** (fail to reject unit root)
+- Daily returns: ADF = −5.31, p ≈ 5.2e-06 → **stationary** (strongly reject unit root)
+- Confirms that returns, not prices, should be used as input to statistical models
+
+---
+
+### 6. `Options/` — Options Theory & Pricing
 Five notebooks covering options from first principles through to exotic contract pricing. Each notebook builds on the last and shares reusable `.py` modules.
 
 | File | Topic |
@@ -106,6 +123,8 @@ Five notebooks covering options from first principles through to exotic contract
 
 ---
 
+---
+
 ## Stack
 
 | Library | Purpose |
@@ -117,6 +136,7 @@ Five notebooks covering options from first principles through to exotic contract
 | `matplotlib` | All plots — histograms, sensitivity charts, Greek curves |
 | `seaborn` | Correlation / covariance heatmaps, loadings heatmap |
 | `sklearn` | StandardScaler, PCA |
+| `statsmodels` | ADF stationarity test |
 | `math` | Scalar BS calculations (log, exp, sqrt) |
 | C++ (`<cmath>`, `<iostream>`) | Low-latency BS pricer — `Option` OOP class |
 
@@ -127,7 +147,7 @@ Five notebooks covering options from first principles through to exotic contract
 ```bash
 git clone https://github.com/kanak27/Quant-journey.git
 cd Quant-journey
-pip install pandas yfinance matplotlib seaborn scipy scikit-learn jupyter
+pip install pandas yfinance matplotlib seaborn scipy scikit-learn statsmodels jupyter
 jupyter notebook
 ```
 
@@ -156,7 +176,8 @@ This repo tracks a structured 7-month plan (April → November 2026) toward quan
 - [x] Greeks — Delta, Gamma, Vega, Theta (analytical + visualised, theta decay curve)
 - [x] Monte Carlo options pricing — European & Asian options, convergence to BS
 - [ ] GARCH(1,1) — fit to Nifty 50 volatility
-- [ ] Time series — autocorrelation, stationarity (ADF test), ARIMA
+- [x] Stationarity testing — ADF test on Nifty 50 prices vs returns
+- [ ] Time series — autocorrelation, ARIMA
 - [x] C++ — Black-Scholes pricer — `Option` class with `price()`, `putPrice()`, `delta()`, `gamma()`, `vega()`
 
 ### ⬜ Phase 3 — Machine Learning for Finance *(July 7 – August 16, 2026)*
