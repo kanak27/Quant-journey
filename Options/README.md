@@ -13,10 +13,12 @@ Options/
 ├── Black Scholes.ipynb               # Analytical pricing from scratch (Python)
 ├── Greeks.ipynb                      # Delta, Gamma, Vega, Theta
 ├── Monte Carlo Options Pricing.ipynb # MC pricing + Asian options
+├── Volatility smile.ipynb            # Implied-vol smile from a live NSE option chain
 ├── Black_Scholes.cpp                 # Black-Scholes pricer in C++ (OOP)
 ├── Options_basic_payoffs.py          # Reusable payoff functions
 ├── Geometric_Brownian_Motion.py      # Reusable GBM simulation engine
-└── Black_Scholes.py                  # Reusable BS pricer (imported by Greeks & MC)
+├── Black_Scholes.py                  # Reusable BS pricer (imported by Greeks, MC & Smile)
+└── option-chain-ED-NIFTY-25-Aug-2026.csv  # NSE option-chain snapshot (smile input)
 ```
 
 > **Python notebooks:** Import from `.py` modules in the same folder. Run Jupyter from within the `Options/` directory, or set the kernel working directory to `Options/`.
@@ -117,7 +119,25 @@ Connects the GBM simulation engine to the Black-Scholes framework to price optio
 
 ---
 
-### 6. `Black_Scholes.cpp` — C++ Implementation (OOP)
+### 6. `Volatility smile.ipynb` — Implied Volatility Smile from a Live Option Chain
+Takes a real NSE NIFTY option-chain snapshot (`option-chain-ED-NIFTY-25-Aug-2026.csv`) and turns it into a volatility smile — the first notebook driven by live market microstructure rather than textbook parameters.
+
+**What's covered:**
+- Parsing the awkward NSE CSV: a two-line header with `LTP`/`IV`/`OI` repeated on the call and put sides, thousands-commas, and `-` placeholders — cleaned into one numeric frame
+- Separating `STRIKE` and the last-traded / mid prices for each side into tidy `calls` / `puts` frames
+- Plotting the **exchange-reported IV** against strike (out-of-the-money each side) to draw the smile
+- Inverting the Black-Scholes call price with `scipy.optimize.brentq` to recover **implied volatility from market prices**, and overlaying it against the exchange's own IV
+
+**Key findings:**
+- IV bottoms near the at-the-money strike (~8–9%) and rises into both wings — the classic equity-index skew, with the downside-put wing steeper than the upside-call wing (crash-protection premium)
+- Reliable IV comes from **out-of-the-money** options; deep in-the-money strikes have near-zero vega, so their inverted IVs are numerically unstable and should be read from the other side of the book
+- Small gaps between the self-computed BS IV and the exchange IV trace back to the exchange's dividend and rate assumptions, which the plain BS inversion here omits
+
+**Note:** `T` is the true time to expiry (days remaining ÷ 365), not a round number of years — using `T = 2` would put the model price permanently above the short-dated market price and the root-finder would never converge.
+
+---
+
+### 7. `Black_Scholes.cpp` — C++ Implementation (OOP)
 A from-scratch C++ re-implementation of the Black-Scholes pricer using object-oriented design. Produces identical results to the Python version, serving as the first step toward low-latency pricing code required at HFT firms.
 
 **Design:**
@@ -159,6 +179,7 @@ g++ -std=c++17 -o option-cpp Black_Scholes.cpp
 | `calculateD2` | `(sigma, T, d1)` | float |
 | `calculateCallOptionPrice` | `(S, K, r, T, sigma)` | float |
 | `calculatePutOptionPrice` | `(callPrice, S, K, r, T)` | float (via Put-Call Parity) |
+| `calculatePutOptionPriceBS` | `(S, K, r, T, sigma)` | float (direct put formula — solvable for IV) |
 
 ### `Geometric_Brownian_Motion.py`
 | Function | Signature | Returns |
