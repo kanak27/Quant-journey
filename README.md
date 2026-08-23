@@ -163,6 +163,7 @@ Five notebooks covering options from first principles through to exotic contract
 | `Black Scholes.ipynb` | BS pricing, Put-Call Parity, sensitivity analysis |
 | `Greeks.ipynb` | Delta, Gamma, Vega, Theta — analytical + visualised |
 | `Monte Carlo Options Pricing.ipynb` | MC pricing of European & Asian options, convergence to BS |
+| `Volatility smile.ipynb` | Implied-vol smile from a live NSE option chain (parse + BS inversion) |
 | `Black_Scholes.cpp` | C++ OOP pricer — `Option` class with price, Greeks |
 
 → Full details in [Options/README.md](Options/README.md)
@@ -222,6 +223,7 @@ This repo tracks a structured 7-month plan (April → November 2026) toward quan
 - [x] Black-Scholes from scratch — call & put pricing, Put-Call Parity verified
 - [x] Greeks — Delta, Gamma, Vega, Theta (analytical + visualised, theta decay curve)
 - [x] Monte Carlo options pricing — European & Asian options, convergence to BS
+- [x] Volatility smile — implied vol vs strike from a live NSE option chain (BS inversion via `brentq`)
 - [x] Stationarity testing — ADF test on Nifty 50 prices vs returns
 - [x] Autocorrelation — ACF & PACF of the return series
 - [x] Time series — ARIMA model identification & fitting
