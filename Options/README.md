@@ -179,6 +179,7 @@ g++ -std=c++17 -o option-cpp Black_Scholes.cpp
 | `calculateD2` | `(sigma, T, d1)` | float |
 | `calculateCallOptionPrice` | `(S, K, r, T, sigma)` | float |
 | `calculatePutOptionPrice` | `(callPrice, S, K, r, T)` | float (via Put-Call Parity) |
+| `calculatePutOptionPriceBS` | `(S, K, r, T, sigma)` | float (direct put formula — solvable for IV) |
 
 ### `Geometric_Brownian_Motion.py`
 | Function | Signature | Returns |

@@ -73,8 +73,23 @@ def calculateCallOptionPrice(stockPrice, exercisePrice, rateOfReturn, timeToExpi
 
 def calculatePutOptionPrice(callOptionPrice, stockPrice, exercisePrice, rateOfReturn, timeToExpiration):
     discountedFuturePrice = exercisePrice * math.exp(-1 * rateOfReturn * timeToExpiration)
-    
+
     return callOptionPrice -stockPrice + discountedFuturePrice
+
+
+# Direct Black-Scholes put price — a standalone function of sigma, so it can be
+# root-solved for implied volatility without first computing the call price.
+# P = K * exp(-rT) * N(-d2) - S * N(-d1)
+def calculatePutOptionPriceBS(stockPrice, exercisePrice, rateOfReturn, timeToExpiration, sigma):
+    d1 = calculateD1(stockPrice, exercisePrice, rateOfReturn, timeToExpiration, sigma)
+    d2 = calculateD2(sigma, timeToExpiration, d1)
+
+    norm1 = stats.norm.cdf(-d1)
+    norm2 = stats.norm.cdf(-d2)
+
+    discountedStrike = exercisePrice * math.exp(-1 * rateOfReturn * timeToExpiration)
+
+    return discountedStrike * norm2 - stockPrice * norm1
 
 
 # In[7]:
