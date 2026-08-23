@@ -8,18 +8,22 @@ A personal learning repository documenting my path into quantitative finance. Ea
 
 ```
 Quant Journey/
-├── Nifty50 Quant prep.ipynb          # Return distributions & descriptive stats
-├── Covariance and Correlation.ipynb  # Portfolio diversification analysis
-├── OLS.ipynb                         # OLS regression & hypothesis testing
-├── PCA.ipynb                         # Principal component analysis
-├── ADF.ipynb                         # Stationarity testing — ADF test
-└── Options/                          # Options theory — see Options/README.md
+├── Nifty50 Quant prep.ipynb              # Return distributions & descriptive stats
+├── Covariance and Correlation.ipynb      # Portfolio diversification analysis
+├── OLS.ipynb                             # OLS regression & hypothesis testing
+├── PCA.ipynb                             # Principal component analysis
+├── Time Series and Volatility/          # Stationarity, autocorrelation, ARIMA, GARCH
+│   ├── ADF.ipynb                        # Stationarity testing — ADF test
+│   ├── ACF and PACF.ipynb               # Autocorrelation & partial autocorrelation
+│   ├── ARIMA.ipynb                      # ARIMA model identification & fitting
+│   └── ARCH and GARCH.ipynb             # GARCH(1,1) volatility modelling
+└── Options/                             # Options theory — see Options/README.md
     ├── Options basic payoffs.ipynb
     ├── Geometric Brownian Motion.ipynb
     ├── Black Scholes.ipynb
     ├── Greeks.ipynb
     ├── Monte Carlo Options Pricing.ipynb
-    ├── Black_Scholes.cpp             # C++ OOP implementation
+    ├── Black_Scholes.cpp                 # C++ OOP implementation
     ├── Black_Scholes.py
     ├── Geometric_Brownian_Motion.py
     └── Options_basic_payoffs.py
@@ -91,19 +95,61 @@ Applies dimensionality reduction to a 10-stock Nifty basket to uncover the laten
 
 ---
 
-### 5. `ADF.ipynb` — Stationarity Testing (Augmented Dickey-Fuller)
-Tests whether the Nifty 50 price series and its return series are stationary — a prerequisite for time series modelling (ARIMA, GARCH).
+### 5. `Time Series and Volatility/` — Stationarity, Autocorrelation, ARIMA & GARCH
+Four notebooks that form the classical time-series toolkit: first establish what is and isn't stationary, then look for linear structure in the mean, then model the structure that *is* reliably there — the volatility. They build on each other and are best read in order.
+
+| File | Topic |
+|---|---|
+| `ADF.ipynb` | Augmented Dickey-Fuller unit-root / stationarity test |
+| `ACF and PACF.ipynb` | Autocorrelation & partial autocorrelation of returns |
+| `ARIMA.ipynb` | ARIMA order identification & fitting on returns |
+| `ARCH and GARCH.ipynb` | GARCH(1,1) conditional-volatility model |
+
+#### 5a. `ADF.ipynb` — Stationarity Testing (Augmented Dickey-Fuller)
+Tests whether the Nifty 50 price series and its return series are stationary — the prerequisite for everything that follows.
 
 **What's covered:**
-- Downloading one year of Nifty 50 closing prices
-- Running `statsmodels.tsa.stattools.adfuller` on both the **raw price series** and **daily return series**
-- Comparing ADF statistic against 1%, 5%, and 10% critical values
-- Interpreting p-values to accept or reject the unit root null hypothesis
+- Running `statsmodels.tsa.stattools.adfuller` on both the **raw price series** and the **daily return series**
+- Comparing the ADF statistic against 1%, 5%, and 10% critical values and reading the p-value
 
 **Key findings:**
-- Closing prices: ADF = −1.53, p = 0.52 → **non-stationary** (fail to reject unit root)
-- Daily returns: ADF = −5.31, p ≈ 5.2e-06 → **stationary** (strongly reject unit root)
-- Confirms that returns, not prices, should be used as input to statistical models
+- Closing prices: ADF ≈ −1.53, p ≈ 0.52 → **non-stationary** (fail to reject the unit-root null)
+- Daily returns: ADF ≈ −5.31, p ≈ 5.2e-06 → **stationary** (strongly reject the unit root)
+- Confirms that returns, not prices, are the right input to ARMA/GARCH-type models
+
+#### 5b. `ACF and PACF.ipynb` — Autocorrelation Structure
+Inspects the linear memory of the return series to guide ARIMA order selection.
+
+**What's covered:**
+- `plot_acf` and `plot_pacf` on daily returns (30 lags) with 95% confidence bands
+
+**Key findings:**
+- Almost all autocorrelation and partial-autocorrelation spikes fall **inside** the confidence bands → the return series behaves close to **white noise** in the mean
+- This immediately tells us to expect very low AR/MA orders — there is little linear structure to fit
+
+#### 5c. `ARIMA.ipynb` — ARIMA Identification & Fitting
+Fits a range of ARIMA(p, d, q) specifications to the return series and compares them by information criteria and residual diagnostics.
+
+**What's covered:**
+- Fitting `(1,0,1)`, `(1,0,0)`, `(0,0,1)`, `(1,1,1)`, `(0,0,0)` and reading AIC/BIC + the Ljung-Box residual test from `model_fit.summary()`
+
+**Key findings:**
+- The plain mean model **ARIMA(0,0,0)** (AIC ≈ 607) is essentially as good as anything more complex; Ljung-Box is non-significant across specs → no exploitable autocorrelation
+- The `(1,0,1)` fit has a marginally lower AIC but its AR and MA roots nearly cancel (ar ≈ −0.97, ma ≈ +0.92), a textbook sign of an over-parameterised, redundant model
+- Bottom line: **daily returns are unpredictable in the mean** — the same weak-form-EMH conclusion the OLS notebook reached, now confirmed by the full ARIMA family
+
+#### 5d. `ARCH and GARCH.ipynb` — Volatility Clustering
+Where the mean has no structure, the *variance* clearly does. Fits a GARCH(1,1) to seven years of Nifty log returns and compares its conditional volatility to a naïve rolling-window estimate.
+
+**What's covered:**
+- Seven years of ^NSEI data, log returns scaled to percent for the `arch` optimiser
+- Fitting `arch.arch_model(returns, vol='Garch', p=1, q=1)` and reading the ω / α / β estimates
+- Overlaying the **GARCH conditional volatility** against a **30-day rolling standard deviation**
+
+**Key findings:**
+- ω ≈ 0.028, α ≈ 0.12, β ≈ 0.855 → **α + β ≈ 0.98**, i.e. very high volatility persistence: shocks to volatility decay slowly and vol clusters strongly
+- GARCH conditional vol tracks the rolling estimate but reacts **faster** to shocks and is far smoother between them — the payoff of an explicit volatility model
+- A small but statistically significant positive mean return (μ ≈ 0.066% / day) survives, unlike in the ARIMA mean models
 
 ---
 
@@ -123,8 +169,6 @@ Five notebooks covering options from first principles through to exotic contract
 
 ---
 
----
-
 ## Stack
 
 | Library | Purpose |
@@ -133,10 +177,11 @@ Five notebooks covering options from first principles through to exotic contract
 | `pandas` | Data wrangling and return calculations |
 | `numpy` | Matrix operations, Brownian motion simulation |
 | `scipy.stats` | Descriptive stats, distribution fitting, t-tests, norm CDF/PDF |
-| `matplotlib` | All plots — histograms, sensitivity charts, Greek curves |
+| `matplotlib` | All plots — histograms, sensitivity charts, Greek curves, volatility overlays |
 | `seaborn` | Correlation / covariance heatmaps, loadings heatmap |
 | `sklearn` | StandardScaler, PCA |
-| `statsmodels` | ADF stationarity test |
+| `statsmodels` | ADF stationarity test, ACF/PACF, ARIMA |
+| `arch` | GARCH(1,1) conditional-volatility modelling |
 | `math` | Scalar BS calculations (log, exp, sqrt) |
 | C++ (`<cmath>`, `<iostream>`) | Low-latency BS pricer — `Option` OOP class |
 
@@ -147,11 +192,13 @@ Five notebooks covering options from first principles through to exotic contract
 ```bash
 git clone https://github.com/kanak27/Quant-journey.git
 cd Quant-journey
-pip install pandas yfinance matplotlib seaborn scipy scikit-learn statsmodels jupyter
+pip install pandas yfinance matplotlib seaborn scipy scikit-learn statsmodels arch jupyter
 jupyter notebook
 ```
 
-Notebooks inside `Options/` import local `.py` modules — run Jupyter from within the `Options/` directory, or set the kernel working directory to `Options/` before executing.
+Notebooks inside `Options/` import local `.py` modules — run Jupyter from within the `Options/` directory, or set the kernel working directory to `Options/` before executing. The `Time Series and Volatility/` notebooks are self-contained (they download their own data) and can be run from anywhere.
+
+> **Note on reproducibility:** every notebook downloads a *live* rolling window from Yahoo Finance, so the exact figures above shift a little each time the notebooks are re-run — the ADF, ACF and ARIMA notebooks use a 1-year window, while the GARCH notebook uses 7 years. The qualitative conclusions are stable; the third-decimal-place numbers are not.
 
 ---
 
@@ -175,9 +222,10 @@ This repo tracks a structured 7-month plan (April → November 2026) toward quan
 - [x] Black-Scholes from scratch — call & put pricing, Put-Call Parity verified
 - [x] Greeks — Delta, Gamma, Vega, Theta (analytical + visualised, theta decay curve)
 - [x] Monte Carlo options pricing — European & Asian options, convergence to BS
-- [ ] GARCH(1,1) — fit to Nifty 50 volatility
 - [x] Stationarity testing — ADF test on Nifty 50 prices vs returns
-- [ ] Time series — autocorrelation, ARIMA
+- [x] Autocorrelation — ACF & PACF of the return series
+- [x] Time series — ARIMA model identification & fitting
+- [x] GARCH(1,1) — fit to Nifty 50 volatility, vs 30-day rolling vol
 - [x] C++ — Black-Scholes pricer — `Option` class with `price()`, `putPrice()`, `delta()`, `gamma()`, `vega()`
 
 ### ⬜ Phase 3 — Machine Learning for Finance *(July 7 – August 16, 2026)*
@@ -203,3 +251,5 @@ This repo tracks a structured 7-month plan (April → November 2026) toward quan
 - [ ] Derive Black-Scholes on a whiteboard from memory
 - [ ] Mock interviews (Pramp, Interviewing.io)
 - [ ] 20+ applications — WorldQuant, Tower, iRage, AlphaGrep, Graviton, Quadeye
+```
+
