@@ -12,6 +12,7 @@ Quant Journey/
 ├── Covariance and Correlation.ipynb      # Portfolio diversification analysis
 ├── OLS.ipynb                             # OLS regression & hypothesis testing
 ├── PCA.ipynb                             # Principal component analysis
+├── CAPM.ipynb                            # CAPM — beta, alpha, systematic vs idiosyncratic risk
 ├── Time Series and Volatility/          # Stationarity, autocorrelation, ARIMA, GARCH
 │   ├── ADF.ipynb                        # Stationarity testing — ADF test
 │   ├── ACF and PACF.ipynb               # Autocorrelation & partial autocorrelation
@@ -153,7 +154,25 @@ Where the mean has no structure, the *variance* clearly does. Fits a GARCH(1,1) 
 
 ---
 
-### 6. `Options/` — Options Theory & Pricing
+### 6. `CAPM.ipynb` — Capital Asset Pricing Model (Beta Estimation)
+Estimates the CAPM characteristic line for a single stock — regressing **Reliance's excess returns** on the **Nifty 50's excess returns** over a 5-year window — to separate systematic (market) risk from idiosyncratic risk.
+
+**What's covered:**
+- Downloading 5 years of ^NSEI and RELIANCE.NS, computing daily percentage returns, and converting to **excess returns** over a daily risk-free rate (6.5% p.a. / 252)
+- Aligning the two return series on shared trading days (join-then-`dropna`) before regressing
+- Fitting the characteristic line with `scipy.stats.linregress` → **beta** (slope), **Jensen's alpha** (intercept), R², and significance
+- **Scatter of excess returns with the fitted line** overlaid, for a visual read of beta (tilt) and fit (spread)
+- A **t-test of whether beta differs from 1** — `(β − 1) / std_err` with a 95% confidence interval — which answers "is Reliance genuinely riskier than the market?" rather than the default "is beta ≠ 0?"
+
+**Key findings (representative):**
+- Beta ≈ **1.11** — Reliance moves slightly more than the market, as expected for a large-cap index heavyweight
+- Alpha ≈ **0** (≈ −0.6% annualised, not statistically distinguishable from zero) — no meaningful risk-adjusted out- or under-performance over the window
+- R² ≈ **0.47** — the market explains roughly half of Reliance's daily variation; the rest is stock-specific (idiosyncratic) risk
+- Note: Reliance is itself a large weight in the Nifty 50, which mechanically inflates the correlation a little — a caveat on the R²
+
+---
+
+### 7. `Options/` — Options Theory & Pricing
 Five notebooks covering options from first principles through to exotic contract pricing. Each notebook builds on the last and shares reusable `.py` modules.
 
 | File | Topic |
@@ -230,9 +249,9 @@ This repo tracks a structured 7-month plan (April → November 2026) toward quan
 - [x] GARCH(1,1) — fit to Nifty 50 volatility, vs 30-day rolling vol
 - [x] C++ — Black-Scholes pricer — `Option` class with `price()`, `putPrice()`, `delta()`, `gamma()`, `vega()`
 
-### ⬜ Phase 3 — Machine Learning for Finance *(July 7 – August 16, 2026)*
+### 🔄 Phase 3 — Machine Learning for Finance *(July 7 – August 16, 2026 — in progress)*
 
-- [ ] CAPM — alpha, beta, systematic vs idiosyncratic risk
+- [x] CAPM — alpha, beta, systematic vs idiosyncratic risk
 - [ ] Fama-French 3-Factor Model on NSE data
 - [ ] Momentum factor (Jegadeesh-Titman)
 - [ ] ML for return prediction — Random Forest, XGBoost
