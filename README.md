@@ -224,6 +224,17 @@ Notebooks inside `Options/` import local `.py` modules — run Jupyter from with
 
 > **Note on reproducibility:** every notebook downloads a *live* rolling window from Yahoo Finance, so the exact figures above shift a little each time the notebooks are re-run — the ADF, ACF and ARIMA notebooks use a 1-year window, while the GARCH notebook uses 7 years. The qualitative conclusions are stable; the third-decimal-place numbers are not.
 
+### Notebook outputs & diffs (dev note)
+
+Committed notebooks are **stripped of their outputs** (plots, printed tables, execution counts) by a small git clean filter — `tools/nbstrip.py`, wired via `.gitattributes`. This keeps diffs readable and the repo small, so re-running a notebook over a different date window no longer shows up as a change. Trade-off: notebooks render code but **not charts on GitHub** — clone and run them locally to regenerate the plots.
+
+Git config isn't cloned, so after a fresh `git clone` register the filter once (needs only `python` on PATH):
+
+```bash
+git config filter.stripoutput.clean "python tools/nbstrip.py"
+git config filter.stripoutput.required false
+```
+
 ---
 
 ## Roadmap
