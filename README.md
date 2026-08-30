@@ -12,7 +12,9 @@ Quant Journey/
 ├── Covariance and Correlation.ipynb      # Portfolio diversification analysis
 ├── OLS.ipynb                             # OLS regression & hypothesis testing
 ├── PCA.ipynb                             # Principal component analysis
-├── CAPM.ipynb                            # CAPM — beta, alpha, Security Market Line (50-stock, multi-window)
+├── Factor Models/                       # Asset pricing — see Factor Models/README.md
+│   ├── CAPM.ipynb                       # CAPM — beta, alpha, Security Market Line (multi-window)
+│   └── Fama-French.ipynb                # 3-factor: market + size (SMB) + value (HML)
 ├── Time Series and Volatility/          # Stationarity, autocorrelation, ARIMA, GARCH
 │   ├── ADF.ipynb                        # Stationarity testing — ADF test
 │   ├── ACF and PACF.ipynb               # Autocorrelation & partial autocorrelation
@@ -154,7 +156,9 @@ Where the mean has no structure, the *variance* clearly does. Fits a GARCH(1,1) 
 
 ---
 
-### 6. `CAPM.ipynb` — Capital Asset Pricing Model: Beta & the Security Market Line
+### 6. `Factor Models/` — Asset Pricing: CAPM, Fama-French & the Security Market Line
+> Now in the **`Factor Models/`** folder (CAPM + Fama-French), with a full **[CAPM vs Fama-French comparison](Factor%20Models/README.md)**.
+
 Two connected exercises. First, the CAPM **characteristic line** for a single stock (Reliance vs the Nifty). Then a **cross-sectional test of CAPM** across the whole Nifty 50 — building the **Security Market Line (SML)** and checking, over two look-back windows, whether average returns actually rise with beta the way theory predicts.
 
 **Part A — single-stock characteristic line (Reliance):**
@@ -267,7 +271,7 @@ This repo tracks a structured 7-month plan (April → November 2026) toward quan
 ### 🔄 Phase 3 — Machine Learning for Finance *(July 7 – August 16, 2026 — in progress)*
 
 - [x] CAPM — alpha, beta, systematic vs idiosyncratic risk
-- [ ] Fama-French 3-Factor Model on NSE data
+- [x] Fama-French 3-Factor Model on NSE data
 - [ ] Momentum factor (Jegadeesh-Titman)
 - [ ] ML for return prediction — Random Forest, XGBoost
 - [ ] Walk-forward cross-validation (avoid look-ahead bias)
