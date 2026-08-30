@@ -12,7 +12,7 @@ Quant Journey/
 ├── Covariance and Correlation.ipynb      # Portfolio diversification analysis
 ├── OLS.ipynb                             # OLS regression & hypothesis testing
 ├── PCA.ipynb                             # Principal component analysis
-├── CAPM.ipynb                            # CAPM — beta, alpha, systematic vs idiosyncratic risk
+├── CAPM.ipynb                            # CAPM — beta, alpha, Security Market Line (50-stock, multi-window)
 ├── Time Series and Volatility/          # Stationarity, autocorrelation, ARIMA, GARCH
 │   ├── ADF.ipynb                        # Stationarity testing — ADF test
 │   ├── ACF and PACF.ipynb               # Autocorrelation & partial autocorrelation
@@ -154,21 +154,25 @@ Where the mean has no structure, the *variance* clearly does. Fits a GARCH(1,1) 
 
 ---
 
-### 6. `CAPM.ipynb` — Capital Asset Pricing Model (Beta Estimation)
-Estimates the CAPM characteristic line for a single stock — regressing **Reliance's excess returns** on the **Nifty 50's excess returns** over a 5-year window — to separate systematic (market) risk from idiosyncratic risk.
+### 6. `CAPM.ipynb` — Capital Asset Pricing Model: Beta & the Security Market Line
+Two connected exercises. First, the CAPM **characteristic line** for a single stock (Reliance vs the Nifty). Then a **cross-sectional test of CAPM** across the whole Nifty 50 — building the **Security Market Line (SML)** and checking, over two look-back windows, whether average returns actually rise with beta the way theory predicts.
 
-**What's covered:**
-- Downloading 5 years of ^NSEI and RELIANCE.NS, computing daily percentage returns, and converting to **excess returns** over a daily risk-free rate (6.5% p.a. / 252)
-- Aligning the two return series on shared trading days (join-then-`dropna`) before regressing
-- Fitting the characteristic line with `scipy.stats.linregress` → **beta** (slope), **Jensen's alpha** (intercept), R², and significance
-- **Scatter of excess returns with the fitted line** overlaid, for a visual read of beta (tilt) and fit (spread)
-- A **t-test of whether beta differs from 1** — `(β − 1) / std_err` with a 95% confidence interval — which answers "is Reliance genuinely riskier than the market?" rather than the default "is beta ≠ 0?"
+**Part A — single-stock characteristic line (Reliance):**
+- 5 years of ^NSEI and RELIANCE.NS, daily percentage returns converted to **excess returns** over a daily risk-free rate (6.5% p.a. / 252)
+- Aligning the two series on shared trading days (join-then-`dropna`) before regressing with `scipy.stats.linregress` → **beta** (slope), **Jensen's alpha** (intercept), R², significance
+- Scatter with the fitted line, plus a **t-test of whether beta differs from 1** (`(β − 1) / std_err` with a 95% CI) — "is Reliance genuinely riskier than the market?", not just "is beta ≠ 0?"
 
-**Key findings (representative):**
-- Beta ≈ **1.11** — Reliance moves slightly more than the market, as expected for a large-cap index heavyweight
-- Alpha ≈ **0** (≈ −0.6% annualised, not statistically distinguishable from zero) — no meaningful risk-adjusted out- or under-performance over the window
-- R² ≈ **0.47** — the market explains roughly half of Reliance's daily variation; the rest is stock-specific (idiosyncratic) risk
-- Note: Reliance is itself a large weight in the Nifty 50, which mechanically inflates the correlation a little — a caveat on the R²
+**Part B — the Security Market Line across all 50 constituents:**
+- Estimating beta and mean excess return for **every current Nifty 50 stock** against the index, over both a **5-year** and a **2-year** window (reusable `compute_sml` / `plot_sml` functions)
+- Plotting the **empirical SML** (OLS fit of mean excess return on beta) against the **theoretical SML** (a line through the origin whose slope is the market's own realized excess return), with the market portfolio marked at β = 1
+- A cross-window **comparison** — summary table, an overlay of both windows, and a dynamic sign-check reporting whether each window's empirical slope agrees with CAPM's prediction
+- **Data hygiene:** the Tata Motors (TMPV) demerger-day price artifact is nulled (TMPV only, so genuine crash days elsewhere are kept)
+
+**Key findings:**
+- **Single stock:** Reliance beta ≈ **1.11**, alpha ≈ **0** (not distinguishable from zero), R² ≈ **0.47** — a near-market-beta large cap with roughly half its variance explained by the index
+- **Cross-section, 5-year:** the empirical SML slopes **upward** (higher beta → higher return, directionally CAPM-consistent) with a near-zero intercept — but far **steeper** than the theoretical line, i.e. the whole cross-section sits *above* the market premium
+- **Cross-section, 2-year:** the theoretical SML can slope **downward** (the Nifty underperformed the risk-free rate), yet the empirical line still slopes up — a direct **sign disagreement** with CAPM
+- **The headline is instability:** realized-return SML tests swing sharply between the 2- and 5-year windows, because the "market premium" is dominated by the specific sample period. Results are further lifted by **survivorship bias** (today's constituents applied backward), **equal- vs cap-weighting**, and **errors-in-variables** from noisy single-stock betas — so this illustrates CAPM's empirical weakness rather than confirming it
 
 ---
 
